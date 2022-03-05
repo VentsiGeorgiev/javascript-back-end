@@ -1,0 +1,46 @@
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{title}}</title>
+    <link href="/static/css/style.css" type="text/css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div>
+
+      <nav>
+        <a>Theater</a>
+        <ul>
+          {{#if hasUser}}
+            <li><a href="/logout">Logout</a></li>
+            <li><a href="/">Home </a></li>
+          {{else}}
+            <li><a href="/">Home </a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+          {{/if}}
+        </ul>
+      </nav>
+      {{#if errors}}
+        <section class="notifications error">
+          {{#each errors}}
+            <p>{{msg}}</p>
+          {{/each}}
+        </section>
+      {{/if}}
+
+      <main>
+        {{{body}}}
+      </main>
+
+      <footer>
+        <div>© 2020
+          <a href="https://softuni.bg/courses/js-back-end">JS Back-End</a>
+        </div>
+      </footer>
+
+    </div>
+  </body>
+
+</html>
