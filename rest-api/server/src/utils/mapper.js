@@ -1,12 +1,12 @@
 function mapErrors(err) {
     if (Array.isArray(err)) {
-        return err;
+        return err.join('\n');
     } else if (err.name == 'ValidationError') {
-        return Object.values(err.errors).map(e => ({ msg: e.message }));
+        return Object.values(err.errors).map(e => e.message).join('\n');
     } else if (typeof err.message == 'string') {
-        return [{ msg: err.message }];
+        return err.message;
     } else {
-        return [{ msg: 'Request error' }];
+        return 'Request error';
     }
 }
 

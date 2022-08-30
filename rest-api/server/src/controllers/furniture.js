@@ -1,15 +1,18 @@
 const router = require('express').Router();
 
+const { isAuth, isOwner } = require('../middlewares/guards');
+const preload = require('../middlewares/preload');
 const api = require('../services/furniture');
 const mapErrors = require('../utils/mapper');
 
 router.get('/', async (req, res) => {
+    console.log(req.user);
     const data = await api.getAll();
     res.json(data);
 
 });
 
-router.post('/', async (req, res) => {
+router.post('/', isAuth(), async (req, res) => {
     console.log(req.body);
 
     const item = {
@@ -20,13 +23,14 @@ router.post('/', async (req, res) => {
         price: req.body.price,
         img: req.body.img,
         material: req.body.material,
+        owner: req.user._id
     };
 
     try {
         const result = await api.create(item);
         res.status(201).json(result);
     } catch (err) {
-        const error = mapErrors(err).join('\n');
+        const error = mapErrors(err);
         console.error(err.message);
         res.status(400).json({ message: error });
     }
@@ -35,12 +39,12 @@ router.post('/', async (req, res) => {
     res.end();
 });
 
-router.get('/:id', async (req, res) => {
-    const item = await api.getById(req.params.id);
+router.get('/:id', preload(), (req, res) => {
+    const item = res.locals.item;
     res.json(item);
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', preload(), isOwner(), async (req, res) => {
     const itemId = req.params.id;
     const item = {
         make: req.body.make,
@@ -49,7 +53,7 @@ router.put('/:id', async (req, res) => {
         description: req.body.description,
         price: req.body.price,
         img: req.body.img,
-        material: req.body.material,
+        material: req.body.material
     };
 
     try {
@@ -62,10 +66,17 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
-    const itemId = req.params.id;
-    await api.deleteById(itemId);
-    res.status(204).end();
+router.delete('/:id', preload(), isOwner(), async (req, res) => {
+    try {
+        const itemId = req.params.id;
+        await api.deleteById(itemId);
+        res.status(204).end();
+    } catch (err) {
+        console.error(err.message);
+        const error = mapErrors(err);
+        res.status(400).json({ message: error });
+    }
+
 });
 
 module.exports = router;
